@@ -5,7 +5,7 @@ import { exit, stdin as input, stdout as output } from 'node:process';
 import { appendFile, readFile, writeFile } from 'node:fs';
 
 const rl = readline.createInterface({ input, output });
-let numOfData = 10;
+
 
 
 async function readTheFile(ID) {
@@ -54,11 +54,14 @@ async function writeToFile() {
         age = await rl.question("Please enter your age: ")
     }
     let id = await rl.question("ID: ")
-    while (!id) {
+    while (!id ) {
         id = await rl.question("Please enter your ID: ")
     }
+    // while (idList.includes(id) || !id ) {
+    //     id = await rl.question("This ID already exists please enter another ID: ")
+    // }
     let data = [firstName, lastName, age, id]
-
+    //idList.push(id)
 
     await readFile('db.txt', (err, rdata) => {
         if (err) {
@@ -95,14 +98,16 @@ async function writeToFile() {
 async function userChoice() {
 
 
-    const choice = await rl.question("Press 1 to write to the file \nPress 2 to read from a file \nPress 3 to finish \n")
-
+    let choice = await rl.question("Press 1 to write to the file \nPress 2 to read from a file \nPress 3 to finish \n")
+    while(choice != '1' && choice !='2'&& choice !='3'){
+        choice = await rl.question("Press 1 to write to the file \nPress 2 to read from a file \nPress 3 to finish \n")
+    }
     if (choice == 1) {
         await writeToFile();
     }
     if (choice == 2) {
         const ID = await rl.question("Enter ID: \n")
-        readTheFile(ID);
+        readTheFile(ID,);
     }
     if (choice == 3) {
         exit(0)
@@ -112,7 +117,7 @@ async function userChoice() {
 
 async function createFile() {
 
-    await readFile('db.txt', (err) => {
+    await readFile('db.txt', (err, data) => {
         if (err) {
             appendFile('db.txt', JSON.stringify(["start"]), (err) => {
                 if (err) {
@@ -120,12 +125,19 @@ async function createFile() {
                 }
             })
         }
+        // else {
+        //     if (data[0] != "start") {
+        //         data.forEach(element => {
+        //             idList.push(element[3])
+        //         });
+        //     }
+        // }
     })
 }
 
+
 createFile()
 userChoice()
-
 
 
 // test()
@@ -150,56 +162,3 @@ userChoice()
 // }
 
 
-// async function aa(){
-
-
-//     let data = ["firstName","lastName",45,45646]
-
-//     await writeFile('db.txt',JSON.stringify(data) , (err) => {
-//         if (err) {
-//             console.error(err);
-//         }
-//     });
-//     data = ["firssfdtName","lastNafsame",345,455646]
-//     await appendFile('db.txt', JSON.stringify(data) , (err) => {
-//         if (err) {
-//             console.error(err);
-//         }
-//     });
-//     data = ["firssfdfgtName","lasfgjhtNafsame",347474745,645]
-//     await appendFile('db.txt',JSON.stringify(data), (err) => {
-//         if (err) {
-//             console.error(err);
-//         }
-//     });
-//     await readFile('db.txt', (err,data) => {
-//         if (err) {
-//             console.error(err);
-//             exit(1)
-//         }
-//         console.log(JSON.parse("[" + data + "]"))
-//         //let ff = JSON.parse(data)
-//         //console.log(JSON.parse("%s",ff));
-//         exit(0)
-//     });
-// }
-
-// aa();
-
-
-// import * as readline from 'node:readline/promises';
-// import { stdin as input, stdout as output } from 'node:process';
-
-// const rl = readline.createInterface({ input, output });
-
-// const answer = await rl.question('What do you think of Node.js? ');
-
-// console.log(`Thank you for your valuable feedback: ${answer}`);
-
-// rl.close();
-
-// let data = {
-//     "first name": firstName,
-// "last name":lastName,
-// "age":age,
-// "id":id}
