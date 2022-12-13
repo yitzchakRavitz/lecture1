@@ -16,7 +16,8 @@ async function readTheFile(ID) {
         }
         let ff = JSON.parse(data)
         let user = []
-        ff.forEach(element => {
+        let databaseLocation = ID % 10 //Finding the array the person is in
+        ff[databaseLocation].forEach(element => {
             if (element[3] == ID) {
                 user.push(element)
             }
@@ -25,11 +26,16 @@ async function readTheFile(ID) {
             console.log("There is no such user! \n");
         }
         else {
+
             user.forEach(element => {
                 console.log("First Name:" + element[0]);
                 console.log("Last Name:" + element[1]);
                 console.log("Age:" + element[2]);
-                console.log("ID:" + element[3] + '\n');
+                console.log("ID:" + element[3] );
+                console.log("city:" + element[4]);
+                console.log("street:" + element[5]);
+                console.log("AhouseNumberge:" + element[6]);
+                console.log("zipCode:" + element[7]+ '\n');
             });
         }
         userChoice()
@@ -39,27 +45,57 @@ async function readTheFile(ID) {
 
 };
 
-
+//A function that adds a new user to a database
 async function writeToFile() {
+    let isnum = true
     let firstName = await rl.question("First Name:")
     while (!firstName) {
         firstName = await rl.question("Please enter your first Name: ")
     }
+
     let lastName = await rl.question("Last Name: ")
     while (!lastName) {
         lastName = await rl.question("Please enter your last Name: ")
     }
+
     let age = await rl.question("Age: ")
-    while (!age) {
+    isnum = /^\d+$/.test(age);
+    while (!age || !isnum) {
         age = await rl.question("Please enter your age: ")
+        isnum = /^\d+$/.test(age);
     }
+
     let id = await rl.question("ID: ")
-    while (!id ) {
+    isnum = /^\d+$/.test(id);
+    while (!id || !isnum) {
         id = await rl.question("Please enter your ID: ")
+        isnum = /^\d+$/.test(id);
     }
-  
-    let data = [firstName, lastName, age, id]
-   
+
+    console.log("Please enter your Address:");
+    let city = await rl.question("City: ")
+    while (!city) {
+        city = await rl.question("Please enter the name of your city: ")
+    }
+
+    let street = await rl.question("street: ")
+    while (!street) {
+        street = await rl.question("Please enter the name of your street: ")
+    }
+    let houseNumber = await rl.question("house number: ")
+    while (!houseNumber) {
+        houseNumber = await rl.question("Please enter your house number: ")
+    }
+
+    let zipCode = await rl.question("zip code number: ")
+    isnum = /^\d+$/.test(zipCode);
+    while (!zipCode || !isnum) {
+        zipCode = await rl.question("Please enter your zip code number: ")
+        isnum = /^\d+$/.test(zipCode);
+    }
+
+    let data = [firstName, lastName, age, id,city,street,houseNumber,zipCode]
+
 
     await readFile('db.txt', (err, rdata) => {
         if (err) {
@@ -67,38 +103,26 @@ async function writeToFile() {
             exit(1)
         }
         let temp = JSON.parse(rdata)
-        if (temp.length == 0) {
-            writeFile('db.txt', JSON.stringify([data]), (err) => {
-                if (err) {
-                    console.error(err);
-                }
-            })
-        }
-        else {
-            temp.push(data)
-            writeFile('db.txt', JSON.stringify(temp), (err) => {
-                if (err) {
-                    console.error(err);
-                }
-            })
-        }
-    }
 
-    )
-
-
-
+        //Makes % for the ID card number and according to the number that comes out it is
+        // inserted into a certain array, and when we go to look for this man it will be much faster
+        let databaseLocation = data[3] % 10
+        temp[databaseLocation].push(data)
+        writeFile('db.txt', JSON.stringify(temp), (err) => {
+            if (err) {
+                console.error(err);
+            }
+        })
+    })
     userChoice()
-
 }
 
 
 async function userChoice() {
-
-
-    let choice = await rl.question("Press 1 to write to the file \nPress 2 to read from a file \nPress 3 to finish \n")
-    while(choice != '1' && choice !='2'&& choice !='3'){
-        choice = await rl.question("Press 1 to write to the file \nPress 2 to read from a file \nPress 3 to finish \n")
+    //The start screen of the program
+    let choice = await rl.question("Press 1 to write to the file \nPress 2 to read from the file \nPress 3 to finish \n")
+    while (choice != '1' && choice != '2' && choice != '3') {
+        choice = await rl.question("Press 1 to write to the file \nPress 2 to read from the file \nPress 3 to finish \n")
     }
     if (choice == 1) {
         await writeToFile();
@@ -118,22 +142,20 @@ async function createFile() {
 
     await readFile('db.txt', (err, data) => {
         if (err) {
-            //Inserts "start" into the program so that later in the program you will know that the file is empty
-            appendFile('db.txt', JSON.stringify([]), (err) => {
+            //Initializes the data base to 10 arrays to optimize the search time of people
+            appendFile('db.txt', JSON.stringify([[], [], [], [], [], [], [], [], [], []]), (err) => {
                 if (err) {
                     console.error(err);
                 }
             })
         }
-        
+
     })
 }
 
 //A function that initializes a file if it does not exist
-//createFile()
+createFile()
 //The beginning of the program
-//userChoice()
+userChoice()
 
-let a = [[[1,1,1],[1,1,1,1],[1,1,1]],[[2,2,2],[2,2,2]],[[3,3,3],[3,3,3]],[[4,4,4],[4,4,4]],[[5,5],[5,5]]]
-a[0].push(["gujg"])
-console.log(a);
+
