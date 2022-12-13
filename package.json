@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run-program" :"node index.js"
+    "start": "node index.js"
+
   },
   "author": "yitzchak ravitz",
-  "license": "ISC"
+  "license": "ISC",
+  "type": "module"
 }
