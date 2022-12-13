@@ -6,7 +6,9 @@ import { appendFile, readFile, writeFile } from 'node:fs';
 
 const rl = readline.createInterface({ input, output });
 
-
+//The program can write user information to a database and search effectively for users,
+// I divided the data base into ten arrays, each data written to the database goes into a certain
+// array determined according to its id, so it is faster to search for it
 
 async function readTheFile(ID) {
     await readFile('db.txt', (err, data) => {
@@ -142,7 +144,7 @@ async function createFile() {
 
     await readFile('db.txt', (err, data) => {
         if (err) {
-            //Initializes the data base to 10 arrays to optimize the search time of people
+            //Initializes the database to 10 arrays to optimize the search time of people
             appendFile('db.txt', JSON.stringify([[], [], [], [], [], [], [], [], [], []]), (err) => {
                 if (err) {
                     console.error(err);
