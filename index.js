@@ -57,11 +57,9 @@ async function writeToFile() {
     while (!id ) {
         id = await rl.question("Please enter your ID: ")
     }
-    // while (idList.includes(id) || !id ) {
-    //     id = await rl.question("This ID already exists please enter another ID: ")
-    // }
+  
     let data = [firstName, lastName, age, id]
-    //idList.push(id)
+   
 
     await readFile('db.txt', (err, rdata) => {
         if (err) {
@@ -69,7 +67,7 @@ async function writeToFile() {
             exit(1)
         }
         let temp = JSON.parse(rdata)
-        if (temp[0] == "start") {
+        if (temp.length == 0) {
             writeFile('db.txt', JSON.stringify([data]), (err) => {
                 if (err) {
                     console.error(err);
@@ -115,50 +113,27 @@ async function userChoice() {
 
 }
 
+//A function that initializes a file if it does not exist
 async function createFile() {
 
     await readFile('db.txt', (err, data) => {
         if (err) {
-            appendFile('db.txt', JSON.stringify(["start"]), (err) => {
+            //Inserts "start" into the program so that later in the program you will know that the file is empty
+            appendFile('db.txt', JSON.stringify([]), (err) => {
                 if (err) {
                     console.error(err);
                 }
             })
         }
-        // else {
-        //     if (data[0] != "start") {
-        //         data.forEach(element => {
-        //             idList.push(element[3])
-        //         });
-        //     }
-        // }
+        
     })
 }
 
+//A function that initializes a file if it does not exist
+//createFile()
+//The beginning of the program
+//userChoice()
 
-createFile()
-userChoice()
-
-
-// test()
-
-// async function test(){
-//     let data = [["firstName","lastName",45,45646],[1,"dsgds",2]]
-//     await writeFile('db.txt',JSON.stringify(data) , (err) => {
-//         if (err) {
-//              console.error(err);
-//         }
-//     });
-//     let a = await readFile('db.txt', (err,data) => {
-//         if (err) {
-//             console.error(err);
-//             exit(1)
-//         }
-//         console.log(JSON.parse(data))
-//         return JSON.parse(data)
-//         exit(0)
-//     });
-//     console.log(a);
-// }
-
-
+let a = [[[1,1,1],[1,1,1,1],[1,1,1]],[[2,2,2],[2,2,2]],[[3,3,3],[3,3,3]],[[4,4,4],[4,4,4]],[[5,5],[5,5]]]
+a[0].push(["gujg"])
+console.log(a);
