@@ -34,9 +34,9 @@ const writeToFile = async function () {
         age = await rl.question("What is your Age ? ");
 
     }
-    const USER_BUF_LEN = 35;
-    const FILL_CHAR = `.`;
-    const bfr = Buffer.alloc(USER_BUF_LEN, FILL_CHAR);
+    const BuferLen = 35;
+    const FillChar = `.`;
+    const bfr = Buffer.alloc(BuferLen, FillChar);
     bfr.write(id, 0)
     bfr.write(firstName, 11);
     bfr.write(lastName, 20);
@@ -52,23 +52,23 @@ const writeToFile = async function () {
     
     async function countLines() {
         const file = await open('./file.txt');
-        let numberOfLines = 0;
+        let numOfLines = 0;
         for await (const line of file.readLines()) {
-            numberOfLines++;
+            numOfLines++;
         }
         let count_Lines =0
-        if(!numberOfLines == 0){
-            count_Lines = numberOfLines - 1;
+        if(!numOfLines == 0){
+            count_Lines = numOfLines - 1;
         }
-        const lengthDoubleSize = count_Lines * 35;
-        const lds = lengthDoubleSize.toString();
+        const size = count_Lines * 35;
+        const stringSize = size.toString();
 
-        const bfrToIndex = Buffer.alloc(20, FILL_CHAR);
-        bfrToIndex.write(id, 0)//This ID should be put in the search bar :  kay
-        bfrToIndex.write(lds, 10) // The value I get here is the number of lines * the size of the line from the name.txt file
-        console.log(`Your information:  \n ID: ${id} \n LDS ${lds} `);
+        const bfrToIndex = Buffer.alloc(20, FillChar);
+        bfrToIndex.write(id, 0)
+        bfrToIndex.write(stringSize, 10) 
+        console.log(`Your information:  \n ID: ${id} \n LDS ${stringSize} `);
         await appendFile('index.txt', `${bfrToIndex}\n`);
-        map1.set(id,lds);
+        map1.set(id,stringSize);
         console.log("success appendFile To Index file");
         start();
     }
@@ -94,16 +94,18 @@ const readFromFile = async () => {
         console.log(theIndex);
         
         theIndex = theIndex.split('.').join("")
-        console.log(` Result Insert Index To Bfr : ${theIndex}`);
+        
  
         
         const fdName = await open('./file.txt');
-        const insertFromNameToBfr = Buffer.alloc(35);
-        await fdName.read(insertFromNameToBfr, 0, 35, parseInt(theIndex));
-        const bfrNameToString = insertFromNameToBfr.toString();
-        const removeBfrNameMark = bfrNameToString.split('.').join(" ")
-        console.log(` Output Object from Name.txt : ${removeBfrNameMark}`);
-        console.log(`Success`);
+        const Bfr = Buffer.alloc(35);
+        await fdName.read(Bfr, 0, 35, parseInt(theIndex));
+        const bfrNameToString = Bfr.toString();
+        const remMark = bfrNameToString.split('.').join(" ")
+        const data = remMark.replace(/\s+/g, ' ').trim().split(" ");
+        console.log(`id = ${ data[0]} \nfirstName =  ${data[1]}  \nlastName = ${ data[2] } \nage =  ${data[3]}\n`);
+       
+        console.log(`Success\n`);
         await fdName.close()
         rl2.close();
        
@@ -114,7 +116,7 @@ const readFromFile = async () => {
 
     start();
 }
-const loadAnIndexIntoMemory = async () => {
+const loadIndex = async () => {
     const fd = await open("./index.txt");
     for await (const line of fd.readLines()) {
         map1.set(line.split('.')[0],line.split('.')[1]);
@@ -146,6 +148,6 @@ async function start() {
     }
 }
 let map1 = new Map();
-loadAnIndexIntoMemory();
+loadIndex();
 
 start();
