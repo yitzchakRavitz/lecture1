@@ -2,9 +2,10 @@
   "name": "lecture1",
   "version": "1.0.0",
   "description": "first lecture at ravtech",
-  "main": "index.js",
+  "main": "array.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node array.js"
   },
   "author": "yitzchak ravitz",
   "license": "ISC",
