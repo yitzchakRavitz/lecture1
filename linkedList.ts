@@ -1,3 +1,8 @@
+import { exit, stdin as input, stdout as output } from 'node:process';
+import * as readline from 'node:readline/promises';
+
+
+
 let indexd : number = 0;
 class myNode {
     public number: number;
@@ -6,8 +11,9 @@ class myNode {
 
     constructor(data: any) {
         this.number = data;
-        this.indexd = indexd + 1
+        this.indexd = indexd;
         this.next = null;
+        indexd = indexd+1;
     }
 }
 
@@ -73,7 +79,53 @@ class LinkedList {
         return null;
     }
 }
+async function generateList() : Promise<LinkedList>  {
+    let myList :LinkedList = new LinkedList();
+    let num = 0;
+    for (let index = 0; index < 50000; index++) {
+        num =Math.floor(Math.random() *500000)
+        if(index == 30000){
+            console.log(num);
+            
+        }
+        myList.append(num);            
+    }
+    return myList;
 
-async function start() {
-    
 }
+
+
+async function start(myList : Promise<LinkedList>) {
+    const rl : any = await readline.createInterface({ input, output, terminal: false });
+    let choice = await rl.question(`enter a number enter "x" to exit  `);
+    while (!choice) {
+        choice = await rl.question(`Please enter a correct number`);
+    }
+    if(choice.includes("x")){
+        exit(0);
+    }
+    else {
+
+        
+        let current : myNode | null = (await myList).find(choice);
+        if(current){
+            console.log(current.number);
+            console.log(current.indexd);
+        }
+        else{
+            console.log("no!!!");
+            
+        }
+        start(myList);
+
+        // let current : myNode | null = myList.head;
+        // while(current) {
+        //     console.log(current?.number); 
+        //     console.log(current?.indexd);
+        //     current = current.next;           
+        // }
+      
+    }
+}
+
+start(generateList());

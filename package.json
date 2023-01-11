@@ -5,7 +5,7 @@
   "main": "array.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node array.js"
+    "start": "node LinkedList.js"
   },
   "author": "yitzchak ravitz",
   "license": "ISC",
