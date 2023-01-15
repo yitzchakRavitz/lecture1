@@ -42,10 +42,16 @@ var indexd = 0;
 var myNode = /** @class */ (function () {
     function myNode(data) {
         this.number = data;
-        this.indexd = indexd;
+        this.index = indexd;
         this.next = null;
         indexd = indexd + 1;
     }
+    myNode.prototype.setNumber = function (data) {
+        this.number = data;
+    };
+    myNode.prototype.setIndex = function (data) {
+        this.index = data;
+    };
     return myNode;
 }());
 var LinkedList = /** @class */ (function () {
@@ -91,8 +97,11 @@ var LinkedList = /** @class */ (function () {
             return null;
         }
         var current = this.head;
+        var count = 0;
         while (current) {
+            count += 1;
             if (current.number == data) {
+                console.log("It took " + count + " tests on the list");
                 return current;
             }
             current = current.next;
@@ -101,6 +110,18 @@ var LinkedList = /** @class */ (function () {
     };
     return LinkedList;
 }());
+function sortWithIndexes(arr) {
+    var indexes = Array.from(arr, function (_, i) { return i; });
+    indexes.sort(function (i1, i2) {
+        if (arr[i1] > arr[i2])
+            return 1;
+        if (arr[i1] < arr[i2])
+            return -1;
+        return 0;
+    });
+    var sortedArr = indexes.map(function (i) { return arr[i]; });
+    return { sortedArr: sortedArr, indexes: indexes };
+}
 function generateList() {
     return __awaiter(this, void 0, void 0, function () {
         var myList, num, index;
@@ -120,41 +141,81 @@ function generateList() {
 }
 function start(myList) {
     return __awaiter(this, void 0, void 0, function () {
-        var rl, choice, current;
+        var rl, choice1, choice, current, arr, current, index, sortedNumbers, sortedarr, indexes, index;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, readline.createInterface({ input: node_process_1.stdin, output: node_process_1.stdout, terminal: false })];
                 case 1:
                     rl = _a.sent();
-                    return [4 /*yield*/, rl.question("enter a number enter \"x\" to exit  ")];
+                    return [4 /*yield*/, rl.question("For an unsorted list, press 1. \nFor a sorted list, press 2. \nTo enter values, press 3. \nTo exit, press 4\n")];
                 case 2:
-                    choice = _a.sent();
-                    _a.label = 3;
+                    choice1 = _a.sent();
+                    if (!(choice1 == "1")) return [3 /*break*/, 8];
+                    return [4 /*yield*/, rl.question("enter a number \n")];
                 case 3:
-                    if (!!choice) return [3 /*break*/, 5];
-                    return [4 /*yield*/, rl.question("Please enter a correct number")];
-                case 4:
                     choice = _a.sent();
-                    return [3 /*break*/, 3];
+                    _a.label = 4;
+                case 4:
+                    if (!!choice) return [3 /*break*/, 6];
+                    return [4 /*yield*/, rl.question("Please enter a correct number\n")];
                 case 5:
-                    if (!choice.includes("x")) return [3 /*break*/, 6];
-                    (0, node_process_1.exit)(0);
-                    return [3 /*break*/, 8];
+                    choice = _a.sent();
+                    return [3 /*break*/, 4];
                 case 6: return [4 /*yield*/, myList];
                 case 7:
                     current = (_a.sent()).find(choice);
                     if (current) {
                         console.log(current.number);
-                        console.log(current.indexd);
+                        console.log(current.index);
                     }
                     else {
                         console.log("no!!!");
                     }
                     start(myList);
                     _a.label = 8;
-                case 8: return [2 /*return*/];
+                case 8:
+                    if (!(choice1 == "2")) return [3 /*break*/, 11];
+                    arr = [];
+                    return [4 /*yield*/, myList];
+                case 9:
+                    current = (_a.sent()).head;
+                    for (index = 0; index < 50000; index++) {
+                        arr[index] = current === null || current === void 0 ? void 0 : current.number;
+                        current === null || current === void 0 ? void 0 : current.next;
+                    }
+                    sortedNumbers = sortWithIndexes(arr);
+                    sortedarr = sortedNumbers.sortedArr;
+                    indexes = sortedNumbers.indexes;
+                    return [4 /*yield*/, myList];
+                case 10:
+                    current = (_a.sent()).head;
+                    for (index = 0; index < 50000; index++) {
+                        current === null || current === void 0 ? void 0 : current.setNumber(sortedarr[index]);
+                        current === null || current === void 0 ? void 0 : current.setIndex(indexes[index]);
+                        current === null || current === void 0 ? void 0 : current.next;
+                    }
+                    _a.label = 11;
+                case 11:
+                    if (choice1.includes("x")) {
+                        (0, node_process_1.exit)(0);
+                    }
+                    return [2 /*return*/];
             }
         });
     });
 }
 start(generateList());
+// function sortWithIndexes<T>(arr: T[]): { sortedArr: T[], indexes: number[] } {
+//     const indexes: number[] = Array.from(arr, (_, i) => i);
+//     indexes.sort((i1, i2) => {
+//         if (arr[i1] > arr[i2]) return 1;
+//         if (arr[i1] < arr[i2]) return -1;
+//         return 0;
+//     });
+//     const sortedArr = indexes.map(i => arr[i]);
+//     return { sortedArr, indexes };
+// }
+// let numbers = [4, 2, 9, 6, 1, 8];
+// let sortedNumbers = sortWithIndexes(numbers);
+// let a = sortedNumbers.indexes
+// console.log(sortedNumbers); // Output: [1, 2, 4, 6, 8, 9]

@@ -1,14 +1,21 @@
 {
+  
   "name": "lecture1",
   "version": "1.0.0",
   "description": "first lecture at ravtech",
-  "main": "array.js",
+  "main": "Stack.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node LinkedList.js"
+    "start": "node Queue.js"
   },
   "author": "yitzchak ravitz",
   "license": "ISC",
+  
+    "compilerOptions": {
+      "esModuleInterop": true
+    },
+  
   "dependencies": {
     "typescript": "^4.9.4"
   },

@@ -1,20 +1,33 @@
 import { exit, stdin as input, stdout as output } from 'node:process';
 import * as readline from 'node:readline/promises';
+import stream from 'stream';
+
+stream.setMaxListeners(100);
 
 
 
 let indexd: number = 0;
 class myNode {
     public number: number;
-    public indexd: number;
+    public index: number;
     public next: myNode | null;
 
     constructor(data: any) {
         this.number = data;
-        this.indexd = indexd;
+        this.index = indexd;
         this.next = null;
         indexd = indexd + 1;
     }
+    public setNumber(data: any): void {
+        this.number = data
+    }
+    public setIndex(data: any): void {
+        this.index = data
+    }
+    public setNext(data: any): void {
+        this.next = data
+    }
+    
 }
 
 class LinkedList {
@@ -75,7 +88,7 @@ class LinkedList {
         while (current) {
             count +=1;
             if (current.number == data) {
-                console.log("It took " + count + " tests on the list");
+                console.log("The run time is: " + count );
                 
                 return current;
             }
@@ -84,6 +97,19 @@ class LinkedList {
         return null;
     }
 }
+
+function sortWithIndexes<T>(arr: T[]): { sortedArr: T[], indexes: number[] } {
+    const indexes: number[] = Array.from(arr, (_, i) => i);
+    indexes.sort((i1, i2) => {
+        if (arr[i1] > arr[i2]) return 1;
+        if (arr[i1] < arr[i2]) return -1;
+        return 0;
+    });
+    const sortedArr = indexes.map(i => arr[i]);
+    return { sortedArr, indexes };
+}
+
+
 async function generateList(): Promise<LinkedList> {
     let myList: LinkedList = new LinkedList();
     let num = 0;
@@ -102,66 +128,70 @@ async function generateList(): Promise<LinkedList> {
 
 async function start(myList: Promise<LinkedList>) {
     const rl: any = await readline.createInterface({ input, output, terminal: false });
-    let choice1 = await rl.question(`For an unsorted list, press 1. \nFor a sorted list, press 3. \nTo enter values, press 3. \nTo exit, press 4`);
+    let choice1 = await rl.question(`For an unsorted list, press 1. \nTo sort the list click 2. \nTo enter values, press 3. \nTo exit, press 4\n`);
 
     if (choice1 == "1") {
         let choice = await rl.question(`enter a number \n`);
         while (!choice) {
-            choice = await rl.question(`Please enter a correct number`);
+            choice = await rl.question(`Please enter a correct number\n`);
         }
         let current: myNode | null = (await myList).find(choice);
         if (current) {
-            console.log(current.number);
-            console.log(current.indexd);
+            console.log("The number:  " + current.number);
+            console.log("The index is:  " + current.index);
+            console.log();
+            
         }
         else {
-            console.log("no!!!");
+            console.log("The number was not found\n");
 
         }
         start(myList);
 
-        // let current : myNode | null = myList.head;
-        // while(current) {
-        //     console.log(current?.number); 
-        //     console.log(current?.indexd);
-        //     current = current.next;           
-        // }
     }
+
     if (choice1 == "2") {
+        
         let arr: Array<number | undefined> = [];
-        let mapIndex: Map<number,number>;
-        let current: myNode | null = (await myList).head;
+        let current: myNode | null | undefined = (await myList).head;
         for (let index = 0; index < 50000; index++) {
             arr[index] = current?.number;
-            mapIndex(current?.number,index);
+            current = current?.next;
         }
-
+        let sortedNumbers: any = sortWithIndexes(arr);
+        let sortedarr : Array<number | undefined> = sortedNumbers.sortedArr;
+        let indexes : Array<number | undefined> = sortedNumbers.indexes;
+        current = (await myList).head;
+        for (let index = 0; index < 50000; index++) {
+            current?.setNumber(sortedarr[index]);
+            current?.setIndex(indexes[index]);
+            current = current?.next;
+        }
+        console.log("The list has been sorted successfully!!\n");
+        
+        start(myList);
     }
-    if (choice1.includes("x")) {
+
+    if (choice1.includes("3")) {
+        let current: myNode | null | undefined = (await myList).head;
+        choice1 = await rl.question(`enter a number `);
+        let parChoice : number | undefined = +choice1;
+        while(current?.next && parChoice > current?.next?.number){
+            current = current?.next;
+        }
+        if (current?.number) {
+            let newNode = new myNode(parChoice);
+            newNode.setNext(current.next);
+            current.setNext(newNode);
+            console.log("The number was inserted after the number: "+ current.number+" found in index: "+ current.index);
+            
+        }
+        start(myList);
+    }
+
+    if (choice1.includes("4")) {
         exit(0);
     }
 }
 
 start(generateList());
-
-
-function quicksort(numbers: number[]) :any {
-    if (numbers.length <= 1) {
-        return numbers;
-    }
-    let pivot = numbers[numbers.length - 1];
-    let left: number[] = [];
-    let right: number[] = [];
-    for (let i = 0; i < numbers.length - 1; i++) {
-        if (numbers[i] < pivot) {
-            left.push(numbers[i]);
-        } else {
-            right.push(numbers[i]);
-        }
-    }
-    return quicksort(left).concat(pivot, quicksort(right));
-}
-
-let numbers = [4, 2, 9, 6, 1, 8];
-let sortedNumbers = quicksort(numbers);
-console.log(sortedNumbers); // Output: [1, 2, 4, 6, 8, 9]
