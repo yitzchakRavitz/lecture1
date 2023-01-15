@@ -108,7 +108,7 @@ function generateList() {
             myList = new LinkedList();
             num = 0;
             for (index = 0; index < 50000; index++) {
-                num = Math.floor(Math.random() * 500000);
+                num = Math.floor(Math.random() * 50000);
                 if (index == 30000) {
                     console.log(num);
                 }
