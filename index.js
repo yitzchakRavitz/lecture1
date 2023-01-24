@@ -70,7 +70,7 @@ const writeToFile = async function () {
         await appendFile('index.txt', `${bfrToIndex}\n`);
         map1.set(id,stringSize);
         console.log("success appendFile To Index file");
-        start();
+        main();
     }
     countLines();
     rl.close();
@@ -114,7 +114,7 @@ const readFromFile = async () => {
         console.log("No such user found");
    }
 
-    start();
+    main();
 }
 const loadIndex = async () => {
     const fd = await open("./index.txt");
@@ -127,7 +127,7 @@ const loadIndex = async () => {
 
 
 
-async function start() {
+async function main() {
    
     const rl = await readline.createInterface({ input, output, terminal: false });
     let choice = await rl.question(`If you want to write to the file enter 1\nIf you want to read from the file enter 2\nenter 3 to exit\n `);
@@ -144,10 +144,10 @@ async function start() {
     }
     else {
         console.log("you don't enter Something Right, Try again");
-        start();
+        main();
     }
 }
 let map1 = new Map();
 loadIndex();
 
-start();
+main();//dfgdgdgdr
