@@ -4,7 +4,7 @@ import { exit, stdin as input, stdout as output } from 'node:process';
 import * as readline from 'node:readline/promises';
 import * as sql from 'sql-parser';
 
-sda
+
 
 const writeToFile = async function (): Promise<void> {
 
