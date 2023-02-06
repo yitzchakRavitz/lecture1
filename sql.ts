@@ -9,6 +9,8 @@ const ALLOWED_ORDER = {
     "SELECT": ["FROM", "WHERE", "GROUP BY", "ORDER BY"],
     "INSERT": ["INTO", "VALUES"]
 };
+const tableColumns =  ["ID","FIRST NAME","LAST NAME","AGE","CITY","COUNTRY"];
+
 
 
 export async function sqlQuery(): Promise<string> {
@@ -55,19 +57,37 @@ async function runningTheQuery(query: string): Promise<void> {
         }
         const usersFile: any = await open('./file.txt');
         const Bfr: Buffer = Buffer.alloc(60);
-        conditions
-        for await (const line of usersFile.readLines()) {
-            if (condition) {
-                
+        if (conditions) {
+            for await (let line of usersFile.readLines()) {
+                const substrings = line.split(/\.(?=.*[a-zA-Z0-9])|(?<=.*[a-zA-Z0-9])\./).filter((substring: string) => substring !== '');
+                line =  substrings.filter((substring: string) => !substring.endsWith('...'));
+                let flag: boolean = true;
+                conditions.forEach(element => {
+                    let condition : any = element.split("=");
+                    let col :string = condition[0];
+            
+                    if (!line[tableColumns.indexOf(col.trim())].toUpperCase() == condition[1].trim()) {
+                        flag=false
+                    }
+                });
+                if (flag) {
+                    columns.forEach(element => {
+                        console.log(line[element]);
+
+                    });
+                    
+                }
+              
+                // idIndex.set(line.split('.')[0], line.split('.')[1]);
             }
-            // idIndex.set(line.split('.')[0], line.split('.')[1]);
+            
+            // const bfrNameToString: string = Bfr.toString();
+            // const remMark: string = bfrNameToString.split('.').join(" ")
+            // const data: string[] = remMark.replace(/\s+/g, ' ').trim().split(" ");
+            // console.log(`id = ${data[0]} \nfirstName =  ${data[1]}  \nlastName = ${data[2]} \nage =  ${data[3]}\ncity =  ${data[4]}\ncountry =  ${data[5]}\n`);
+    
         }
         
-        const bfrNameToString: string = Bfr.toString();
-        const remMark: string = bfrNameToString.split('.').join(" ")
-        const data: string[] = remMark.replace(/\s+/g, ' ').trim().split(" ");
-        console.log(`id = ${data[0]} \nfirstName =  ${data[1]}  \nlastName = ${data[2]} \nage =  ${data[3]}\ncity =  ${data[4]}\ncountry =  ${data[5]}\n`);
-
     }
     console.log(columns);
     console.log(conditions);
@@ -118,16 +138,24 @@ async function checkSqlQuery(query: string): Promise<boolean> {
     return true
 }
 
-// let a = "SELECT * FROM dsg WHERE aa= bb and sdf =asdfas"
-// a = a.toUpperCase()
-// console.log(a);
-// console.log(runningTheQuery(a));
-// console.log("asda");
+let a = "SELECT * FROM dsg WHERE first name = aa "
+a = a.toUpperCase()
+console.log(a);
+console.log(runningTheQuery(a));
+console.log("asda");
+
+let b = ["a","b"]
 
 
+// const tableCo = ["ID ","FIRST NAME ","LAST NAME ","AGE ","CITY ","COUNTRY "];
 
 
+// let element= "LAST NAME = bb";
+// let condition : any = element.split("=");
+// console.log(typeof(condition[0]));
+
+// let col :string = condition[0];
 
 
-
+// console.log(tableCo.indexOf(col));
 
