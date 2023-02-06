@@ -2,10 +2,11 @@ import { open } from 'node:fs/promises';
 import { appendFile } from "node:fs/promises";
 import { exit, stdin as input, stdout as output } from 'node:process';
 import * as readline from 'node:readline/promises';
+//import { sqlQuery } from './sql';
 //import * as sql from 'sql-parser';
 
 
-async function userDetails(): Promise<Map<string, string>> {
+async function getUserDetails(): Promise<Map<string, string>> {
 
     let user: Map<string, string> = new Map();
 
@@ -45,6 +46,20 @@ async function userDetails(): Promise<Map<string, string>> {
     }
     user.set("age", age)
 
+    let city: string = await rl.question("What city are you from ?  ");
+    while (!city || city.length > 10) {
+        console.log("The input is incorrect, try again");
+        city = await rl.question("What city are you from ?  ");
+    }
+    user.set("city", city)
+
+    let country: string = await rl.question("What country are you from ?  ");
+    while (!country || country.length > 10) {
+        console.log("The input is incorrect, try again");
+        country = await rl.question("What country are you from ?  ");
+    }
+    user.set("country", country)
+
     rl.close();
     return user
 }
@@ -52,12 +67,15 @@ async function userDetails(): Promise<Map<string, string>> {
 
 const writeToFile = async function (): Promise<void> {
 
-    let user: Map<string, string> = await userDetails();
+    let user: Map<string, string> = await getUserDetails();
 
     let id: string | undefined = user.get("id")
     let firstName: string | undefined = user.get("firstName")
     let lastName: string | undefined = user.get("lastName")
     let age: string | undefined = user.get("age")
+    let city: string | undefined = user.get("city")
+    let country: string | undefined = user.get("country")
+
     if (id == undefined) {
         id = ""
     }
@@ -70,8 +88,14 @@ const writeToFile = async function (): Promise<void> {
     if (age == undefined) {
         age = ""
     }
+    if (city == undefined) {
+        city = ""
+    }
+    if (country == undefined) {
+        country = ""
+    }
 
-    const BuferLen: number = 35;
+    const BuferLen: number = 60;
     const FillChar: string = `.`;
 
     const bfr: Buffer = Buffer.alloc(BuferLen, FillChar);
@@ -79,13 +103,16 @@ const writeToFile = async function (): Promise<void> {
     bfr.write(firstName, 11);
     bfr.write(lastName, 20);
     bfr.write(age, 30);
+    bfr.write(city, 40);
+    bfr.write(country, 50);
 
-    console.log(`ID: ${id} \n First Name: ${firstName} \n Last Name : ${lastName} \n Age : ${age}`);
+    console.log(`ID: ${id} \n First Name: ${firstName} \n Last Name : ${lastName} \n Age : ${age}\n city : ${city}\n country : ${country}`);
 
     addToFile(bfr);
     countLines(id, FillChar);
 
 }
+
 async function addToFile(bfr: Buffer) {
     await appendFile('file.txt', `${bfr}\n`);
     console.log("success appendFile To file");
@@ -101,7 +128,7 @@ async function countLines(id: string, FillChar: string): Promise<void> {
     if (numOfLines != 0) {
         count_Lines = numOfLines - 1;
     }
-    const size: number = count_Lines * 35;
+    const size: number = count_Lines * 60;
     const stringSize: string = size.toString();
 
     const bfrToIndex: Buffer = Buffer.alloc(20, FillChar);
@@ -109,7 +136,7 @@ async function countLines(id: string, FillChar: string): Promise<void> {
     bfrToIndex.write(stringSize, 10)
     console.log(`Your information:  \n ID: ${id} \n LDS ${stringSize} `);
     await appendFile('index.txt', `${bfrToIndex}\n`);
-    map1.set(id, stringSize);
+    idIndex.set(id, stringSize);
     console.log("success appendFile To Index file");
     main();
 }
@@ -126,9 +153,9 @@ async function readFromFile(): Promise<void> {
     console.log(findIndex);
 
 
-    if (map1.get(findIndex)) {
+    if (idIndex.get(findIndex)) {
 
-        let theIndex: any = map1.get(findIndex);
+        let theIndex: any = idIndex.get(findIndex);
         console.log(theIndex);
 
         theIndex = theIndex.split('.').join("");
@@ -136,12 +163,12 @@ async function readFromFile(): Promise<void> {
 
 
         const fdName: any = await open('./file.txt');
-        const Bfr: Buffer = Buffer.alloc(35);
-        await fdName.read(Bfr, 0, 35, parseInt(theIndex));
+        const Bfr: Buffer = Buffer.alloc(60);
+        await fdName.read(Bfr, 0, 60, parseInt(theIndex));
         const bfrNameToString: string = Bfr.toString();
         const remMark: string = bfrNameToString.split('.').join(" ")
         const data: string[] = remMark.replace(/\s+/g, ' ').trim().split(" ");
-        console.log(`id = ${data[0]} \nfirstName =  ${data[1]}  \nlastName = ${data[2]} \nage =  ${data[3]}\n`);
+        console.log(`id = ${data[0]} \nfirstName =  ${data[1]}  \nlastName = ${data[2]} \nage =  ${data[3]}\ncity =  ${data[4]}\ncountry =  ${data[5]}\n`);
 
         console.log(`Success\n`);
         await fdName.close()
@@ -157,7 +184,7 @@ async function readFromFile(): Promise<void> {
 async function loadIndex(): Promise<void> {
     const fd: any = await open("./index.txt");
     for await (const line of fd.readLines()) {
-        map1.set(line.split('.')[0], line.split('.')[1]);
+        idIndex.set(line.split('.')[0], line.split('.')[1]);
     }
 
 
@@ -174,12 +201,14 @@ async function main(): Promise<void> {
     }
     if (choice.includes("1")) {
         writeToFile();
-    } else if (choice.includes("2")) {
+    } 
+    else if (choice.includes("2")) {
         readFromFile();
     }
-    else if (choice.includes("3")) {
-        sqlQuery();
-    }
+    // else if (choice.includes("3")) {
+    //     console.log(sqlQuery());
+         
+    // }
     else if (choice.includes("4")) {
         exit(0);
     }
@@ -189,59 +218,7 @@ async function main(): Promise<void> {
     }
 }
 
-let map1: Map<string, string> = new Map();
-// loadIndex();
-// main();
-
-async function sqlQuery(): Promise<void> {
-    const rl: any = await readline.createInterface({ input, output, terminal: false });
-    let query: string = await rl.question(`enter a query : \n`);
-    while (!checkSqlQuery(query)) {
-        query = await rl.question(`You entered an invalid query`);
-    }
-
-
-}
-
-const SQL_KEYWORDS = new Set(["SELECT", "FROM", "WHERE", "AND", "OR", "ORDER BY", "INSERT",]);
-const ALLOWED_ORDER = {
-    "SELECT": ["FROM", "WHERE", "GROUP BY", "ORDER BY"],
-    "INSERT": ["INTO", "VALUES"]
-};
-
-
-async function checkSqlQuery(query: string): Promise<boolean> {
-    try {
-        let lastKeyword: string | undefined;
-        const words = query.split(/\s+/);
-        const firstWord = words[0].toUpperCase();
-        if (firstWord !== "SELECT" && firstWord !== "INSERT") {
-            throw new Error("Invalid query type");
-        }
-        for (const word of words) {
-            if (SQL_KEYWORDS.has(word.toUpperCase())) {
-                if (lastKeyword && ALLOWED_ORDER[firstWord].indexOf(word.toUpperCase()) === -1) {
-                    throw new Error(`Invalid keyword order: ${lastKeyword} ${word}`);
-                }
-                lastKeyword = word;
-            }
-            
-        }
-        return true;
-    } catch (err) {
-        console.error(err);
-        return false;
-    }
-}
-
-let a = "insert * ghj dsg"
-console.log(checkSqlQuery(a));
-console.log("asda");
-
-
-
-
-
-
-
+let idIndex: Map<string, string> = new Map();
+loadIndex();
+main();
 
