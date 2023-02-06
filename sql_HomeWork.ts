@@ -2,11 +2,12 @@ import { open } from 'node:fs/promises';
 import { appendFile } from "node:fs/promises";
 import { exit, stdin as input, stdout as output } from 'node:process';
 import * as readline from 'node:readline/promises';
-import * as sql from 'sql-parser';
+//import * as sql from 'sql-parser';
 
 
+async function userDetails(): Promise<Map<string, string>> {
 
-const writeToFile = async function (): Promise<void> {
+    let user: Map<string, string> = new Map();
 
     const rl: any = readline.createInterface({ input, output });
     let id: string = await rl.question("What is your id ?  ");
@@ -14,29 +15,65 @@ const writeToFile = async function (): Promise<void> {
         console.log("The input is incorrect, try again");
         id = await rl.question("What is your id ?  ");
     }
+    user.set("id", id)
 
     let firstName: string = await rl.question("What is your First Name ?");
     while (!firstName || firstName.length > 10) {
         console.log("The input is incorrect, try again");
         firstName = await rl.question("What is your First Name ?   ");
     }
+    user.set("firstName", firstName)
+
     let lastName: string = await rl.question("What is your Last Name ?  ");
     while (!lastName || lastName.length > 10) {
         console.log("The input is incorrect, try again");
         lastName = await rl.question("What is your Last Name ?  ");
     }
+    user.set("lastName", lastName)
+
+
     let age: string = await rl.question("What is your Age ?  ");
     while (!age || age.length > 3) {
         console.log("The input is incorrect, try again");
         age = await rl.question("What is your Age ?  ");
     }
+
     while (isNaN(parseInt(age))) {
         console.log("it's not a number");
         age = await rl.question("What is your Age ? ");
 
     }
+    user.set("age", age)
+
+    rl.close();
+    return user
+}
+
+
+const writeToFile = async function (): Promise<void> {
+
+    let user: Map<string, string> = await userDetails();
+
+    let id: string | undefined = user.get("id")
+    let firstName: string | undefined = user.get("firstName")
+    let lastName: string | undefined = user.get("lastName")
+    let age: string | undefined = user.get("age")
+    if (id == undefined) {
+        id = ""
+    }
+    if (firstName == undefined) {
+        firstName = ""
+    }
+    if (lastName == undefined) {
+        lastName = ""
+    }
+    if (age == undefined) {
+        age = ""
+    }
+
     const BuferLen: number = 35;
     const FillChar: string = `.`;
+
     const bfr: Buffer = Buffer.alloc(BuferLen, FillChar);
     bfr.write(id, 0)
     bfr.write(firstName, 11);
@@ -44,39 +81,39 @@ const writeToFile = async function (): Promise<void> {
     bfr.write(age, 30);
 
     console.log(`ID: ${id} \n First Name: ${firstName} \n Last Name : ${lastName} \n Age : ${age}`);
-    async function addToFile() {
-        await appendFile('file.txt', `${bfr}\n`);
-        console.log("success appendFile To file");
-    }
-    addToFile();
 
-
-    async function countLines(): Promise<void> {
-        const file: any = await open('./file.txt');
-        let numOfLines: number = 0;
-        for await (const line of file.readLines()) {
-            numOfLines++;
-        }
-        let count_Lines = 0
-        if (numOfLines != 0) {
-            count_Lines = numOfLines - 1;
-        }
-        const size: number = count_Lines * 35;
-        const stringSize: string = size.toString();
-
-        const bfrToIndex: Buffer = Buffer.alloc(20, FillChar);
-        bfrToIndex.write(id, 0)
-        bfrToIndex.write(stringSize, 10)
-        console.log(`Your information:  \n ID: ${id} \n LDS ${stringSize} `);
-        await appendFile('index.txt', `${bfrToIndex}\n`);
-        map1.set(id, stringSize);
-        console.log("success appendFile To Index file");
-        main();
-    }
-    countLines();
-    rl.close();
+    addToFile(bfr);
+    countLines(id, FillChar);
 
 }
+async function addToFile(bfr: Buffer) {
+    await appendFile('file.txt', `${bfr}\n`);
+    console.log("success appendFile To file");
+}
+
+async function countLines(id: string, FillChar: string): Promise<void> {
+    const file: any = await open('./file.txt');
+    let numOfLines: number = 0;
+    for await (const line of file.readLines()) {
+        numOfLines++;
+    }
+    let count_Lines = 0
+    if (numOfLines != 0) {
+        count_Lines = numOfLines - 1;
+    }
+    const size: number = count_Lines * 35;
+    const stringSize: string = size.toString();
+
+    const bfrToIndex: Buffer = Buffer.alloc(20, FillChar);
+    bfrToIndex.write(id, 0)
+    bfrToIndex.write(stringSize, 10)
+    console.log(`Your information:  \n ID: ${id} \n LDS ${stringSize} `);
+    await appendFile('index.txt', `${bfrToIndex}\n`);
+    map1.set(id, stringSize);
+    console.log("success appendFile To Index file");
+    main();
+}
+
 
 async function readFromFile(): Promise<void> {
     const rl2 = readline.createInterface({ input, output });
@@ -151,10 +188,10 @@ async function main(): Promise<void> {
         main();
     }
 }
-let map1: Map<string, string> = new Map();
-loadIndex();
 
-main();
+let map1: Map<string, string> = new Map();
+// loadIndex();
+// main();
 
 async function sqlQuery(): Promise<void> {
     const rl: any = await readline.createInterface({ input, output, terminal: false });
@@ -166,18 +203,19 @@ async function sqlQuery(): Promise<void> {
 
 }
 
-const SQL_KEYWORDS = new Set(["SELECT", "FROM", "WHERE", "AND", "OR", "ORDER BY", "INSERT", ]);
+const SQL_KEYWORDS = new Set(["SELECT", "FROM", "WHERE", "AND", "OR", "ORDER BY", "INSERT",]);
 const ALLOWED_ORDER = {
     "SELECT": ["FROM", "WHERE", "GROUP BY", "ORDER BY"],
     "INSERT": ["INTO", "VALUES"]
 };
+
 
 async function checkSqlQuery(query: string): Promise<boolean> {
     try {
         let lastKeyword: string | undefined;
         const words = query.split(/\s+/);
         const firstWord = words[0].toUpperCase();
-        if (firstWord !== "SELECT" && firstWord !== "INSERT" ) {
+        if (firstWord !== "SELECT" && firstWord !== "INSERT") {
             throw new Error("Invalid query type");
         }
         for (const word of words) {
@@ -187,6 +225,7 @@ async function checkSqlQuery(query: string): Promise<boolean> {
                 }
                 lastKeyword = word;
             }
+            
         }
         return true;
     } catch (err) {
@@ -194,3 +233,15 @@ async function checkSqlQuery(query: string): Promise<boolean> {
         return false;
     }
 }
+
+let a = "insert * ghj dsg"
+console.log(checkSqlQuery(a));
+console.log("asda");
+
+
+
+
+
+
+
+
