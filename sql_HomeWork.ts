@@ -2,7 +2,7 @@ import { open } from 'node:fs/promises';
 import { appendFile } from "node:fs/promises";
 import { exit, stdin as input, stdout as output } from 'node:process';
 import * as readline from 'node:readline/promises';
-//import { sqlQuery } from './sql';
+import { sqlQuery } from './sql';
 //import * as sql from 'sql-parser';
 
 
@@ -10,27 +10,27 @@ async function getUserDetails(): Promise<Map<string, string>> {
 
     let user: Map<string, string> = new Map();
 
-    const rl: any = readline.createInterface({ input, output });
+    const rl: any = await readline.createInterface({ input, output });
     let id: string = await rl.question("What is your id ?  ");
     while (!id || id.length != 9) {
         console.log("The input is incorrect, try again");
         id = await rl.question("What is your id ?  ");
     }
-    user.set("id", id)
+    user.set("ID", id)
 
     let firstName: string = await rl.question("What is your First Name ?");
     while (!firstName || firstName.length > 10) {
         console.log("The input is incorrect, try again");
         firstName = await rl.question("What is your First Name ?   ");
     }
-    user.set("firstName", firstName)
+    user.set("FIRSTNAME", firstName)
 
     let lastName: string = await rl.question("What is your Last Name ?  ");
     while (!lastName || lastName.length > 10) {
         console.log("The input is incorrect, try again");
         lastName = await rl.question("What is your Last Name ?  ");
     }
-    user.set("lastName", lastName)
+    user.set("LASTNAME", lastName)
 
 
     let age: string = await rl.question("What is your Age ?  ");
@@ -44,55 +44,51 @@ async function getUserDetails(): Promise<Map<string, string>> {
         age = await rl.question("What is your Age ? ");
 
     }
-    user.set("age", age)
+    user.set("AGE", age)
 
     let city: string = await rl.question("What city are you from ?  ");
     while (!city || city.length > 10) {
         console.log("The input is incorrect, try again");
         city = await rl.question("What city are you from ?  ");
     }
-    user.set("city", city)
+    user.set("CITY", city)
 
     let country: string = await rl.question("What country are you from ?  ");
     while (!country || country.length > 10) {
         console.log("The input is incorrect, try again");
         country = await rl.question("What country are you from ?  ");
     }
-    user.set("country", country)
+    user.set("COUNTRY", country)
 
     rl.close();
     return user
 }
 
-
-const writeToFile = async function (): Promise<void> {
-
-    let user: Map<string, string> = await getUserDetails();
-
-    let id: string | undefined = user.get("id")
-    let firstName: string | undefined = user.get("firstName")
-    let lastName: string | undefined = user.get("lastName")
-    let age: string | undefined = user.get("age")
-    let city: string | undefined = user.get("city")
-    let country: string | undefined = user.get("country")
+export async function setInputIntoBuffer(user: Map<string, string>): Promise<Buffer> {
+    let id: string | undefined = user.get("ID")
+    let firstName: string | undefined = user.get("FIRSTNAME")
+    let lastName: string | undefined = user.get("LASTNAME")
+    let age: string | undefined = user.get("AGE")
+    let city: string | undefined = user.get("CITY")
+    let country: string | undefined = user.get("COUNTRY")
 
     if (id == undefined) {
-        id = ""
+        id = "0"
     }
     if (firstName == undefined) {
-        firstName = ""
+        firstName = "Unknown"
     }
     if (lastName == undefined) {
-        lastName = ""
+        lastName = "Unknown"
     }
     if (age == undefined) {
-        age = ""
+        age = "0"
     }
     if (city == undefined) {
-        city = ""
+        city = "Unknown"
     }
     if (country == undefined) {
-        country = ""
+        country = "Unknown"
     }
 
     const BuferLen: number = 60;
@@ -105,20 +101,34 @@ const writeToFile = async function (): Promise<void> {
     bfr.write(age, 30);
     bfr.write(city, 40);
     bfr.write(country, 50);
-
     console.log(`ID: ${id} \n First Name: ${firstName} \n Last Name : ${lastName} \n Age : ${age}\n city : ${city}\n country : ${country}`);
 
-    addToFile(bfr);
-    countLines(id, FillChar);
-
+    return bfr;
 }
 
-async function addToFile(bfr: Buffer) {
+
+async function writeToFile(): Promise<void> {
+
+    let user: Map<string, string> = await getUserDetails();
+    const bfr: Buffer = await setInputIntoBuffer(user);
+
+    const FillChar: string = `.`;
+    let id: string | undefined = await user.get("ID")
+    if (id == undefined) {
+        id = ""
+    }
+
+    await addToFile(bfr);
+    await countLines(id, FillChar);
+    main();
+}
+
+export async function addToFile(bfr: Buffer) {
     await appendFile('file.txt', `${bfr}\n`);
     console.log("success appendFile To file");
 }
 
-async function countLines(id: string, FillChar: string): Promise<void> {
+export async function countLines(id: string, FillChar: string): Promise<void> {
     const file: any = await open('./file.txt');
     let numOfLines: number = 0;
     for await (const line of file.readLines()) {
@@ -138,12 +148,12 @@ async function countLines(id: string, FillChar: string): Promise<void> {
     await appendFile('index.txt', `${bfrToIndex}\n`);
     idIndex.set(id, stringSize);
     console.log("success appendFile To Index file");
-    main();
+
 }
 
 
 async function readFromFile(): Promise<void> {
-    const rl2 = readline.createInterface({ input, output });
+    const rl2 = await readline.createInterface({ input, output });
 
     let findIndex = await rl2.question("Enter your ID");
     while (!findIndex || findIndex.length !== 9) {
@@ -155,7 +165,7 @@ async function readFromFile(): Promise<void> {
 
     if (idIndex.get(findIndex)) {
 
-        let theIndex: any = idIndex.get(findIndex);
+        let theIndex: any = await idIndex.get(findIndex);
         console.log(theIndex);
 
         theIndex = theIndex.split('.').join("");
@@ -172,14 +182,15 @@ async function readFromFile(): Promise<void> {
 
         console.log(`Success\n`);
         await fdName.close()
-        rl2.close();
+        
 
     }
     else {
         console.log("No such user found");
     }
-
+    await rl2.close();
     main();
+
 }
 async function loadIndex(): Promise<void> {
     const fd: any = await open("./index.txt");
@@ -199,16 +210,18 @@ async function main(): Promise<void> {
     while (!choice) {
         choice = await rl.question(`Please enter a correct number`);
     }
+
     if (choice.includes("1")) {
-        writeToFile();
-    } 
-    else if (choice.includes("2")) {
-        readFromFile();
+        await writeToFile();
     }
-    // else if (choice.includes("3")) {
-    //     console.log(sqlQuery());
-         
-    // }
+    else if (choice.includes("2")) {
+        await readFromFile();
+
+    }
+    else if (choice.includes("3")) {
+        console.log(await sqlQuery());
+        main();
+    }
     else if (choice.includes("4")) {
         exit(0);
     }
@@ -219,6 +232,9 @@ async function main(): Promise<void> {
 }
 
 let idIndex: Map<string, string> = new Map();
+
 loadIndex();
 main();
+
+
 
