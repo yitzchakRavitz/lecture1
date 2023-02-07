@@ -4,6 +4,8 @@ import { exit, stdin as input, stdout as output } from 'node:process';
 import * as readline from 'node:readline/promises';
 import { sqlQuery } from './sql';
 //import * as sql from 'sql-parser';
+import { EventEmitter } from 'events';
+EventEmitter.setMaxListeners(40);
 
 
 async function getUserDetails(): Promise<Map<string, string>> {
@@ -182,7 +184,7 @@ async function readFromFile(): Promise<void> {
 
         console.log(`Success\n`);
         await fdName.close()
-        
+
 
     }
     else {
@@ -204,30 +206,34 @@ async function loadIndex(): Promise<void> {
 
 
 async function main(): Promise<void> {
+    try {
+        const rl: any = await readline.createInterface({ input, output, terminal: false });
+        let choice: string = await rl.question(`If you want to write to the file enter 1\nIf you want to read from the file enter 2\nenter 3 to write an sql query\nenter 4 to exit\n `);
+        while (!choice) {
+            choice = await rl.question(`Please enter a correct number`);
+        }
 
-    const rl: any = await readline.createInterface({ input, output, terminal: false });
-    let choice: string = await rl.question(`If you want to write to the file enter 1\nIf you want to read from the file enter 2\nenter 3 to write an sql query\nenter 4 to exit\n `);
-    while (!choice) {
-        choice = await rl.question(`Please enter a correct number`);
-    }
+        if (choice.includes("1")) {
+            await writeToFile();
+        }
+        else if (choice.includes("2")) {
+            await readFromFile();
 
-    if (choice.includes("1")) {
-        await writeToFile();
+        }
+        else if (choice.includes("3")) {
+            console.log(await sqlQuery());
+        }
+        else if (choice.includes("4")) {
+            exit(0);
+        }
+        else {
+            console.log("you don't enter Something Right, Try again");
+            main();
+        }
     }
-    else if (choice.includes("2")) {
-        await readFromFile();
+    catch (massege) {
+        console.log(massege);
 
-    }
-    else if (choice.includes("3")) {
-        console.log(await sqlQuery());
-        main();
-    }
-    else if (choice.includes("4")) {
-        exit(0);
-    }
-    else {
-        console.log("you don't enter Something Right, Try again");
-        main();
     }
 }
 

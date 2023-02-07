@@ -83,8 +83,11 @@ async function runningSelectQuery(query: string): Promise<void> {
             conditions.forEach(element => {
                 let condition: any = element.split("=");
                 let col: string = condition[0];
-
-                if (line[tableColumns.indexOf(col.trim())].toUpperCase() != condition[1].trim()) {
+            
+                if (tableColumns.indexOf(col.trim()) == -1) {
+                    throw("You inserted a column that does not exist");
+                }
+                if ( line[tableColumns.indexOf(col.trim())].toUpperCase() != condition[1].trim()) {
                     flag = false
                 }
             });
