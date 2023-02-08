@@ -5,7 +5,6 @@ import * as readline from 'node:readline/promises';
 import { sqlQuery } from './sql';
 //import * as sql from 'sql-parser';
 import { EventEmitter } from 'events';
-EventEmitter.setMaxListeners(40);
 
 
 async function getUserDetails(): Promise<Map<string, string>> {
@@ -122,7 +121,7 @@ async function writeToFile(): Promise<void> {
 
     await addToFile(bfr);
     await countLines(id, FillChar);
-    main();
+    //main();
 }
 
 export async function addToFile(bfr: Buffer) {
@@ -191,7 +190,7 @@ async function readFromFile(): Promise<void> {
         console.log("No such user found");
     }
     await rl2.close();
-    main();
+    //main();
 
 }
 async function loadIndex(): Promise<void> {
@@ -206,13 +205,16 @@ async function loadIndex(): Promise<void> {
 
 
 async function main(): Promise<void> {
-    try {
-        const rl: any = await readline.createInterface({ input, output, terminal: false });
-        let choice: string = await rl.question(`If you want to write to the file enter 1\nIf you want to read from the file enter 2\nenter 3 to write an sql query\nenter 4 to exit\n `);
-        while (!choice) {
-            choice = await rl.question(`Please enter a correct number`);
-        }
 
+    const rl: any = await readline.createInterface({ input, output, terminal: false });
+    console.log();
+    
+    let choice: string = await rl.question(`If you want to write to the file enter 1\nIf you want to read from the file enter 2\nenter 3 to write an sql query\nenter 4 to exit\n `);
+    while (!choice) {
+        choice = await rl.question(`Please enter a correct number`);
+    }
+    await rl.close();
+    while (choice != "4") {
         if (choice.includes("1")) {
             await writeToFile();
         }
@@ -230,12 +232,19 @@ async function main(): Promise<void> {
             console.log("you don't enter Something Right, Try again");
             main();
         }
+        console.log();
+        const rl: any = await readline.createInterface({ input, output, terminal: false });
+        
+        choice = await rl.question(`If you want to write to the file enter 1\nIf you want to read from the file enter 2\nenter 3 to write an sql query\nenter 4 to exit\n `);
+        while (!choice) {
+            choice = await rl.question(`Please enter a correct number`);
+        }
+        await rl.close();
     }
-    catch (massege) {
-        console.log(massege);
 
-    }
+
 }
+
 
 let idIndex: Map<string, string> = new Map();
 
