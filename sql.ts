@@ -9,75 +9,94 @@ const ALLOWED_ORDER = {
     "SELECT": ["FROM", "WHERE", "GROUP BY", "ORDER BY"],
     "INSERT": ["INTO", "VALUES"]
 };
-const tableColumns = ["ID", "FIRST NAME", "LAST NAME", "AGE", "CITY", "COUNTRY"];
+const tableColumns = ["ID", "FIRST_NAME", "LAST_NAME", "AGE", "CITY", "COUNTRY"];
 
-
+async function getQuery(): Promise<string> {
+    const rl: any = await readline.createInterface({ input, output, terminal: false });
+    console.log("\nYou can write a query that uses the following columns:");
+    console.log("ID, FIRST_NAME, LAST_NAME, AGE, CITY, COUNTRY");
+    let query: string = await rl.question(`enter a query : \n`);
+    return query;
+}
 
 export async function sqlQuery(): Promise<string> {
-    const rl: any = await readline.createInterface({ input, output, terminal: false });
-    let query: string = await rl.question(`enter a query : \n`);
-    while (!checkSqlQuery(query)) {
-        query = await rl.question(`You entered an invalid query`);
-    }
+    let query: string = await getQuery()
     const res: boolean = await checkSqlQuery(query);
     if (!res) {
         return "You entered an invalid query"
     }
-    runningQuery(query)
+    const words = query.split(/\s+/);
 
-    return "success"
+    if (words[0].toUpperCase() == "SELECT") {
+        await runningSelectQuery(query);
+    }
+    if (words[0].toUpperCase() == "INSERT") {
+        await runningInsertQuery(query);
+    }
+    
+    return "done"
 }
 
-
+async function checkingData(queryMap: Map<string, string>): Promise<boolean> {
+    let id: string | undefined = queryMap.get("ID")
+    let fName: string | undefined = queryMap.get("FIRST_NAME")
+    let lName: string | undefined = queryMap.get("LAST_NAME")
+    let age: string | undefined = queryMap.get("AGE")
+    let city: string | undefined = queryMap.get("CITY")
+    let country: string | undefined = queryMap.get("COUNTRY")
+    let res: boolean = true;
+    if (id && id.length != 9) {
+        console.log("The id input is incorrect");
+        res = false;
+    }
+    if (fName && fName.length >= 9) {
+        console.log("The first Name input is incorrect");
+        res = false;
+    }
+    if (lName && lName.length >= 9) {
+        console.log("The last Name input is incorrect");
+        res = false;
+    }
+    if (age && age.length >= 3) {
+        console.log("The age input is incorrect");
+        res = false;
+    }
+    if (city && city.length >= 9) {
+        console.log("The city input is incorrect");
+        res = false;
+    }
+    if (country && country.length >= 9) {
+        console.log("The country input is incorrect");
+        res = false;
+    }
+    return res;
+}
 
 async function runningInsertQuery(query: string): Promise<void> {
-    let queryMap: Map<string, string> = await extractValuesFromInsertQuery(query);
-
-    const bfr: Buffer = await setInputIntoBuffer(queryMap);
-
-    const FillChar: string = `.`;
-    let id: string | undefined = queryMap.get("ID")
-    if (id == undefined) {
-        id = ""
-    }
-    if (id.length != 9) {
-        console.log("The id input is incorrect");
-        return;
-    }
-
-    addToFile(bfr);
-    countLines(id, FillChar);
-}
-
-async function runningSelectQuery(query: string): Promise<void> {
     try {
+        let queryMap: Map<string, string> = await extractValuesFromInsertQuery(query);
 
-
-        const columns: string[] = [];
-        const conditions: string[] = [];
-        query = query.toUpperCase();
-        const words = query.split(/\s+/);
-
-        // Split query by "FROM" keyword
-        const queryParts = query.split("FROM");
-        if (queryParts[0]) {
-            // Split first part of query (before "FROM") by "," to get columns
-            const columnString = queryParts[0].split("SELECT")[1];
-            if (columnString) {
-                columns.push(...columnString.trim().split(",").map(column => column.trim()));
+        if (await checkingData(queryMap)) {
+            const bfr: Buffer = await setInputIntoBuffer(queryMap);
+            const FillChar: string = `.`;
+            let id: string | undefined = queryMap.get("ID")
+            if (id == undefined) {
+                id = ""
             }
-        }
 
-        // Check if there is a "WHERE" clause in the query
-        if (queryParts[1] && queryParts[1].includes("WHERE")) {
-            // Split second part of query (after "FROM") by "WHERE" to get conditions
-            const conditionString = queryParts[1].split("WHERE")[1];
-            if (conditionString) {
-                conditions.push(...conditionString.trim().split("AND").map(condition => condition.trim()));
-            }
+
+            addToFile(bfr);
+            countLines(id, FillChar);
         }
+    } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+}
+async function dataSearch(columns: string[], conditions: string[], query: string): Promise<void> {
+    try {
+        //const words = query.split(/\s+/);
         const usersFile: any = await open('./file.txt');
-        const Bfr: Buffer = Buffer.alloc(60);
+        //const Bfr: Buffer = Buffer.alloc(60);
         if (conditions) {
             for await (let line of usersFile.readLines()) {
                 const substrings = line.split(/\.(?=.*[a-zA-Z0-9])|(?<=.*[a-zA-Z0-9])\./).filter((substring: string) => substring !== '');
@@ -114,24 +133,40 @@ async function runningSelectQuery(query: string): Promise<void> {
         await usersFile.close()
     } catch (error) {
         console.log(error);
-        
+
     }
-   
 }
 
-
-async function runningQuery(query: string): Promise<void> {
+async function runningSelectQuery(query: string): Promise<void> {
+    const columns: string[] = [];
+    const conditions: string[] = [];
     query = query.toUpperCase();
-    const words = query.split(/\s+/);
 
-    if (words[0].toUpperCase() == "SELECT") {
-        runningSelectQuery(query);
+
+    // Split query by "FROM" keyword
+    const queryParts = query.split("FROM");
+    if (queryParts[0]) {
+        // Split first part of query (before "FROM") by "," to get columns
+        const columnString = queryParts[0].split("SELECT")[1];
+        if (columnString) {
+            columns.push(...columnString.trim().split(",").map(column => column.trim()));
+        }
     }
-    if (words[0].toUpperCase() == "INSERT") {
-        runningInsertQuery(query);
+
+    // Check if there is a "WHERE" clause in the query
+    if (queryParts[1] && queryParts[1].includes("WHERE")) {
+        // Split second part of query (after "FROM") by "WHERE" to get conditions
+        const conditionString = queryParts[1].split("WHERE")[1];
+        if (conditionString) {
+            conditions.push(...conditionString.trim().split("AND").map(condition => condition.trim()));
+        }
     }
+
+    await dataSearch(columns, conditions, query);
 
 }
+
+
 
 async function checkSqlQuery(query: string): Promise<boolean> {
     let lastKeyword: string | undefined;
@@ -153,6 +188,8 @@ async function checkSqlQuery(query: string): Promise<boolean> {
 
 
 async function extractValuesFromInsertQuery(query: string): Promise<Map<string, string>> {
+
+
     const fileStartIndex = query.indexOf("into") + 4;
     const fileEndIndex = query.indexOf("(");
     const file = query.substring(fileStartIndex, fileEndIndex).trim().toLowerCase();
@@ -166,21 +203,26 @@ async function extractValuesFromInsertQuery(query: string): Promise<Map<string, 
     const valuesEndIndex = query.lastIndexOf(")");
     const valuesString = query.substring(valuesStartIndex, valuesEndIndex).trim();
     const values = valuesString.split(",").map(value => value.trim());
-
+  
+    
     if (columns.length !== values.length) {
-        throw new Error("The number of columns and values does not match.");
+        throw new Error("The number of columns and values does not match");
     }
 
     const result = new Map<string, string>();
     result.set('file', file);
     columns.forEach((column, i) => {
+        if (!tableColumns.includes(column)) {
+            throw new Error("Incorrect column insertion");
+        }
         values[i] = values[i].replace(/['"]+/g, '');
         result.set(column, values[i]);
     });
+
     return result;
+
+
 }
 
 
-
-  //"INSERT into file (id, firstname, lastname) values ("1234", "yaki", "klein")"
 

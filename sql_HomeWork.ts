@@ -24,14 +24,14 @@ async function getUserDetails(): Promise<Map<string, string>> {
         console.log("The input is incorrect, try again");
         firstName = await rl.question("What is your First Name ?   ");
     }
-    user.set("FIRSTNAME", firstName)
+    user.set("FIRST_NAME", firstName)
 
     let lastName: string = await rl.question("What is your Last Name ?  ");
     while (!lastName || lastName.length > 10) {
         console.log("The input is incorrect, try again");
         lastName = await rl.question("What is your Last Name ?  ");
     }
-    user.set("LASTNAME", lastName)
+    user.set("LAST_NAME", lastName)
 
 
     let age: string = await rl.question("What is your Age ?  ");
@@ -67,8 +67,8 @@ async function getUserDetails(): Promise<Map<string, string>> {
 
 export async function setInputIntoBuffer(user: Map<string, string>): Promise<Buffer> {
     let id: string | undefined = user.get("ID")
-    let firstName: string | undefined = user.get("FIRSTNAME")
-    let lastName: string | undefined = user.get("LASTNAME")
+    let firstName: string | undefined = user.get("FIRST_NAME")
+    let lastName: string | undefined = user.get("LAST_NAME")
     let age: string | undefined = user.get("AGE")
     let city: string | undefined = user.get("CITY")
     let country: string | undefined = user.get("COUNTRY")
