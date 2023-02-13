@@ -1,7 +1,4 @@
 import { open } from 'node:fs/promises';
-import { appendFile } from "node:fs/promises";
-import { exit, stdin as input, stdout as output } from 'node:process';
-import * as readline from 'node:readline/promises';
 import { setInputIntoBuffer, addToFile, countLines } from '.'
 import {sqlQuestions} from "./UI/UserInputQuestions"
 

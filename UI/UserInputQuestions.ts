@@ -1,9 +1,3 @@
-import { open } from 'node:fs/promises';
-import { appendFile } from "node:fs/promises";
-import { exit, stdin as input, stdout as output } from 'node:process';
-import * as readline from 'node:readline/promises';
-//import * as sql from 'sql-parser';
-import { EventEmitter } from 'events';
 import { validateInput } from './inputValidation'
 
 export async function setInputQuestions(idIndex:Map<string,string>): Promise<Map<string, string>> {
