@@ -6,7 +6,7 @@ import { sqlQuery } from './sql';
 //import * as sql from 'sql-parser';
 import { EventEmitter } from 'events';
 import {validateInput} from './UI/inputValidation'
-import { mainQuestions, readFromFileQuestions, setInputQuestions } from './UI/UserInputQuestions';
+import { deleteQuestions, mainQuestions, readQuestions, setInputQuestions, updateQuestions } from './UI/UserInputQuestions';
 
 
 
@@ -101,7 +101,7 @@ export async function countLines(idIndex: Map<string, string> , id: string, Fill
 async function readFromFile(idIndex : Map<string, string>): Promise<void> {
     const rl2 = await readline.createInterface({ input, output });
 
-    let findIndex = await readFromFileQuestions();
+    let findIndex = await readQuestions();
     
     if (idIndex.get(findIndex)) {
 
@@ -132,6 +132,37 @@ async function readFromFile(idIndex : Map<string, string>): Promise<void> {
     //main();
 
 }
+
+async function deleteFromFile(idIndex: Map<string, string> ): Promise<void> {
+
+    try {
+        let id:string = await deleteQuestions(idIndex);
+        idIndex.delete(id);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+async function updateFile(idIndex: Map<string, string> ): Promise<void> {
+
+    try {
+        let user: Map<string, string> =  await updateQuestions(idIndex);
+        const bfr: Buffer = await setInputIntoBuffer(user);
+
+        const FillChar: string = `.`;
+        let id: string | undefined = await user.get("ID")
+        if (id == undefined) {
+            id = ""
+        }
+    
+        await addToFile(bfr);
+        await countLines(idIndex , id, FillChar);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 async function loadIndex(): Promise<Map<string, string>> {
     let idIndex: Map<string, string> = new Map();
     const fd: any = await open("./index.txt");
@@ -147,10 +178,11 @@ async function loadIndex(): Promise<Map<string, string>> {
 async function main(): Promise<void> {
     let idIndex : Map<string, string> = await loadIndex();
     
+    console.log(idIndex);
     
     let choice: string = await mainQuestions();
     
-    while (choice != "4") {
+    while (choice != "6") {
 
         if (choice.includes("1")) {
             await writeToFile(idIndex);
@@ -160,9 +192,15 @@ async function main(): Promise<void> {
 
         }
         else if (choice.includes("3")) {
-            console.log(await sqlQuery(idIndex));
+            await deleteFromFile(idIndex);
         }
         else if (choice.includes("4")) {
+            await updateFile(idIndex);
+        }
+        else if (choice.includes("5")) {
+            console.log(await sqlQuery(idIndex));
+        }
+        else if (choice.includes("6")) {
             exit(0);
         }
         else {
@@ -190,43 +228,7 @@ main();
 
 
 
-// async function main(): Promise<void> {
-
-//     const rl: any = await readline.createInterface({ input, output, terminal: false });
-//     console.log();
-    
-//     let choice: string = await rl.question(`If you want to write to the file enter 1\nIf you want to read from the file enter 2\nenter 3 to write an sql query\nenter 4 to exit\n `);
-//     while (!choice) {
-//         choice = await rl.question(`Please enter a correct number`);
-//     }
-//     await rl.close();
-//     while (choice != "4") {
-//         if (choice.includes("1")) {
-//             await writeToFile();
-//         }
-//         else if (choice.includes("2")) {
-//             await readFromFile();
-
-//         }
-//         else if (choice.includes("3")) {
-//             console.log(await sqlQuery());
-//         }
-//         else if (choice.includes("4")) {
-//             exit(0);
-//         }
-//         else {
-//             console.log("you don't enter Something Right, Try again");
-//             main();
-//         }
-//         console.log();
-//         const rl: any = await readline.createInterface({ input, output, terminal: false });
-        
-//         choice = await rl.question(`If you want to write to the file enter 1\nIf you want to read from the file enter 2\nenter 3 to write an sql query\nenter 4 to exit\n `);
-//         while (!choice) {
-//             choice = await rl.question(`Please enter a correct number`);
-//         }
-//         await rl.close();
-//     }
 
 
-// }
+
+
