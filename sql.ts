@@ -19,7 +19,7 @@ async function getQuery(): Promise<string> {
     return query;
 }
 
-export async function sqlQuery(): Promise<string> {
+export async function sqlQuery(idIndex: Map<string, string>): Promise<string> {
     let query: string = await getQuery()
     const res: boolean = await checkSqlQuery(query);
     if (!res) {
@@ -31,7 +31,7 @@ export async function sqlQuery(): Promise<string> {
         await runningSelectQuery(query);
     }
     if (words[0].toUpperCase() == "INSERT") {
-        await runningInsertQuery(query);
+        await runningInsertQuery(idIndex,query);
     }
     
     return "done"
@@ -72,7 +72,7 @@ async function checkingData(queryMap: Map<string, string>): Promise<boolean> {
     return res;
 }
 
-async function runningInsertQuery(query: string): Promise<void> {
+async function runningInsertQuery(idIndex: Map<string, string>,query: string): Promise<void> {
     try {
         let queryMap: Map<string, string> = await extractValuesFromInsertQuery(query);
 
@@ -86,7 +86,7 @@ async function runningInsertQuery(query: string): Promise<void> {
 
 
             addToFile(bfr);
-            countLines(id, FillChar);
+            countLines(idIndex,id, FillChar);
         }
     } catch (error: any) {
         console.error("Error:", error.message);

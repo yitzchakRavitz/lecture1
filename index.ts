@@ -52,7 +52,7 @@ export async function setInputIntoBuffer(user: Map<string, string>): Promise<Buf
     return bfr;
 }
 
-async function writeToFile(): Promise<void> {
+async function writeToFile(idIndex : Map<string, string>): Promise<void> {
 
     let user: Map<string, string> = await setInputQuestions(idIndex);
     
@@ -65,7 +65,7 @@ async function writeToFile(): Promise<void> {
     }
 
     await addToFile(bfr);
-    await countLines(id, FillChar);
+    await countLines(idIndex , id, FillChar);
     //main();
 }
 
@@ -74,7 +74,7 @@ export async function addToFile(bfr: Buffer) {
     console.log("success appendFile To file");
 }
 
-export async function countLines(id: string, FillChar: string): Promise<void> {
+export async function countLines(idIndex: Map<string, string> , id: string, FillChar: string): Promise<void> {
     const file: any = await open('./file.txt');
     let numOfLines: number = 0;
     for await (const line of file.readLines()) {
@@ -98,7 +98,7 @@ export async function countLines(id: string, FillChar: string): Promise<void> {
 }
 
 
-async function readFromFile(): Promise<void> {
+async function readFromFile(idIndex : Map<string, string>): Promise<void> {
     const rl2 = await readline.createInterface({ input, output });
 
     let findIndex = await readFromFileQuestions();
@@ -132,33 +132,35 @@ async function readFromFile(): Promise<void> {
     //main();
 
 }
-async function loadIndex(): Promise<void> {
+async function loadIndex(): Promise<Map<string, string>> {
+    let idIndex: Map<string, string> = new Map();
     const fd: any = await open("./index.txt");
     for await (const line of fd.readLines()) {
         idIndex.set(line.split('.')[0], line.split('.')[1]);
     }
-
+    return idIndex;
 
 }
 
 
 
 async function main(): Promise<void> {
-
+    let idIndex : Map<string, string> = await loadIndex();
     
     
     let choice: string = await mainQuestions();
     
     while (choice != "4") {
+
         if (choice.includes("1")) {
-            await writeToFile();
+            await writeToFile(idIndex);
         }
         else if (choice.includes("2")) {
-            await readFromFile();
+            await readFromFile(idIndex);
 
         }
         else if (choice.includes("3")) {
-            console.log(await sqlQuery());
+            console.log(await sqlQuery(idIndex));
         }
         else if (choice.includes("4")) {
             exit(0);
@@ -175,9 +177,9 @@ async function main(): Promise<void> {
 }
 
 
-let idIndex: Map<string, string> = new Map();
 
-loadIndex();
+
+
 main();
 
 
