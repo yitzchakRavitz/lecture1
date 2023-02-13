@@ -2,17 +2,17 @@ import { open } from 'node:fs/promises';
 import { appendFile } from "node:fs/promises";
 import { exit, stdin as input, stdout as output } from 'node:process';
 import * as readline from 'node:readline/promises';
-
+import {validateInput} from './input'
 
 
 const writeToFile = async function () {
-
-    const rl = readline.createInterface({ input, output });
-    let id = await rl.question("What is your id ?  ");
-    while (!id || id.length != 9) {
-        console.log("The input is incorrect, try again");
-        id = await rl.question("What is your id ?  ");
-    }
+    const question = await validateInput("What is your id ?  ",9,"string");
+    // const rl = readline.createInterface({ input, output });
+    // let id = await rl.question("What is your id ?  ");
+    // while (!id || id.length != 9) {
+    //     console.log("The input is incorrect, try again");
+    //     id = await rl.question("What is your id ?  ");
+    // }
 
     let firstName = await rl.question("What is your First Name ?");
     while (!firstName || firstName.length > 10) {
