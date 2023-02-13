@@ -3,6 +3,7 @@ import { appendFile } from "node:fs/promises";
 import { exit, stdin as input, stdout as output } from 'node:process';
 import * as readline from 'node:readline/promises';
 import { setInputIntoBuffer, addToFile, countLines } from '.'
+import {sqlQuestions} from "./UI/UserInputQuestions"
 
 const SQL_KEYWORDS = new Set(["SELECT", "FROM", "WHERE", "AND", "OR", "ORDER BY", "INSERT",]);
 const ALLOWED_ORDER = {
@@ -11,16 +12,10 @@ const ALLOWED_ORDER = {
 };
 const tableColumns = ["ID", "FIRST_NAME", "LAST_NAME", "AGE", "CITY", "COUNTRY"];
 
-async function getQuery(): Promise<string> {
-    const rl: any = await readline.createInterface({ input, output, terminal: false });
-    console.log("\nYou can write a query that uses the following columns:");
-    console.log("ID, FIRST_NAME, LAST_NAME, AGE, CITY, COUNTRY");
-    let query: string = await rl.question(`enter a query : \n`);
-    return query;
-}
+
 
 export async function sqlQuery(idIndex: Map<string, string>): Promise<string> {
-    let query: string = await getQuery()
+    let query: string = await sqlQuestions()
     const res: boolean = await checkSqlQuery(query);
     if (!res) {
         return "You entered an invalid query"

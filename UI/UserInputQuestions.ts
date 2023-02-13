@@ -48,3 +48,10 @@ export async function mainQuestions(): Promise<string> {
     let id: string = await validateInput('If you want to write to the file enter 1\nIf you want to read from the file enter 2\nenter 3 to write an sql query\nenter 4 to exit\n ',1,1,"number");
     return id
 }
+
+export async function sqlQuestions(): Promise<string> {
+    console.log("\nYou can write a query that uses the following columns:");
+    console.log("ID, FIRST_NAME, LAST_NAME, AGE, CITY, COUNTRY");
+    let query: string = await validateInput(`enter a query : \n`,0,100,"string");
+    return query;
+}
