@@ -1,6 +1,6 @@
 import { validateInput } from './inputValidation'
 
-export async function setInputQuestions(idIndex:Map<string,string>): Promise<Map<string, string>> {
+export async function getInputQuestions(idIndex:Map<string,string>): Promise<Map<string, string>> {
 
     let user: Map<string, string> = new Map();
 
@@ -15,14 +15,14 @@ export async function setInputQuestions(idIndex:Map<string,string>): Promise<Map
 }
 
 
-export async function readQuestions(): Promise<string> {
+export async function getReadFileQuestions(): Promise<string> {
 
     let id: string = await validateInput("Enter your ID:  ", 9, 9, "string");
     return id;
 }
 
 
-export async function deleteQuestions(idIndex:Map<string,string>): Promise<string> {
+export async function getDeleteQuestions(idIndex:Map<string,string>): Promise<string> {
 
     let id: string = await validateInput("Enter the ID that you want to delete:  ", 9, 9, "string");
     if(!idIndex.get(id)){
@@ -50,7 +50,7 @@ async function insertUserQuestions(user:Map<string,string>): Promise<Map<string,
     return user
 }
 
-export async function updateQuestions(idIndex:Map<string,string>): Promise<Map<string, string>> {
+export async function getUpdateQuestions(idIndex:Map<string,string>): Promise<Map<string, string>> {
     let user: Map<string, string> = new Map();
 
     let id: string = await validateInput("Enter the ID that you want to update:  ", 9, 9, "string");
@@ -65,7 +65,7 @@ export async function updateQuestions(idIndex:Map<string,string>): Promise<Map<s
 
 
 
-export async function mainQuestions(): Promise<string> {
+export async function getMainQuestions(): Promise<string> {
     let id: string = await validateInput('If you want to write to the file enter 1\nIf you want to read from the file enter 2\nIf you want to delete from the file enter 3\nIf you want to update the file enter 4\nenter 5 to write an sql query\nenter 6 to exit\n ',1,1,"number");
     return id
 }

@@ -6,7 +6,7 @@ import { sqlQuery } from './sql';
 //import * as sql from 'sql-parser';
 import { EventEmitter } from 'events';
 import {validateInput} from './UI/inputValidation'
-import { deleteQuestions, mainQuestions, readQuestions, setInputQuestions, updateQuestions } from './UI/UserInputQuestions';
+import { getDeleteQuestions, getMainQuestions, getReadFileQuestions, getInputQuestions, getUpdateQuestions } from './UI/UserInputQuestions';
 
 
 
@@ -54,7 +54,7 @@ export async function setInputIntoBuffer(user: Map<string, string>): Promise<Buf
 
 async function writeToFile(idIndex : Map<string, string>): Promise<void> {
 
-    let user: Map<string, string> = await setInputQuestions(idIndex);
+    let user: Map<string, string> = await getInputQuestions(idIndex);
     
     const bfr: Buffer = await setInputIntoBuffer(user);
 
@@ -101,7 +101,7 @@ export async function countLines(idIndex: Map<string, string> , id: string, Fill
 async function readFromFile(idIndex : Map<string, string>): Promise<void> {
     const rl2 = await readline.createInterface({ input, output });
 
-    let findIndex = await readQuestions();
+    let findIndex = await getReadFileQuestions();
     
     if (idIndex.get(findIndex)) {
 
@@ -136,7 +136,7 @@ async function readFromFile(idIndex : Map<string, string>): Promise<void> {
 async function deleteFromFile(idIndex: Map<string, string> ): Promise<void> {
 
     try {
-        let id:string = await deleteQuestions(idIndex);
+        let id:string = await getDeleteQuestions(idIndex);
         idIndex.delete(id);
     } catch (error) {
         console.log(error);
@@ -147,7 +147,7 @@ async function deleteFromFile(idIndex: Map<string, string> ): Promise<void> {
 async function updateFile(idIndex: Map<string, string> ): Promise<void> {
 
     try {
-        let user: Map<string, string> =  await updateQuestions(idIndex);
+        let user: Map<string, string> =  await getUpdateQuestions(idIndex);
         const bfr: Buffer = await setInputIntoBuffer(user);
 
         const FillChar: string = `.`;
@@ -177,10 +177,8 @@ async function loadIndex(): Promise<Map<string, string>> {
 
 async function main(): Promise<void> {
     let idIndex : Map<string, string> = await loadIndex();
-    
-    console.log(idIndex);
-    
-    let choice: string = await mainQuestions();
+        
+    let choice: string = await getMainQuestions();
     
     while (choice != "6") {
 
@@ -208,7 +206,7 @@ async function main(): Promise<void> {
             main();
         }
         console.log();
-        choice = await mainQuestions();
+        choice = await getMainQuestions();
     }
 
 
