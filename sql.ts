@@ -1,18 +1,20 @@
 import { open } from 'node:fs/promises';
 import { setInputIntoBuffer, addToFile, countLines } from '.'
-import {sqlQuestions} from "./UI/UserInputQuestions"
+import {getSqlQuestions} from "./UI/UserInputQuestions"
 
-const SQL_KEYWORDS = new Set(["SELECT", "FROM", "WHERE", "AND", "OR", "ORDER BY", "INSERT",]);
+const SQL_KEYWORDS = new Set(["SELECT", "FROM", "WHERE", "AND", "OR", "ORDER BY", "INSERT","DELETE","UPDATE"]);
 const ALLOWED_ORDER = {
     "SELECT": ["FROM", "WHERE", "GROUP BY", "ORDER BY"],
-    "INSERT": ["INTO", "VALUES"]
+    "INSERT": ["INTO", "VALUES"],
+    // "DELETE":
+    // "UPDATE":
 };
 const tableColumns = ["ID", "FIRST_NAME", "LAST_NAME", "AGE", "CITY", "COUNTRY"];
 
 
 
 export async function sqlQuery(idIndex: Map<string, string>): Promise<string> {
-    let query: string = await sqlQuestions()
+    let query: string = await getSqlQuestions()
     const res: boolean = await checkSqlQuery(query);
     if (!res) {
         return "You entered an invalid query"
@@ -84,6 +86,7 @@ async function runningInsertQuery(idIndex: Map<string, string>,query: string): P
         console.error("Error:", error.message);
       }
 }
+
 async function dataSearch(columns: string[], conditions: string[], query: string): Promise<void> {
     try {
         //const words = query.split(/\s+/);

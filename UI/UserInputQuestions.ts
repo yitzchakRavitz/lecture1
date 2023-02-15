@@ -70,9 +70,9 @@ export async function getMainQuestions(): Promise<string> {
     return id
 }
 
-export async function sqlQuestions(): Promise<string> {
-    console.log("\nYou can write a query that uses the following columns:");
+export async function getSqlQuestions(): Promise<string> {
+    console.log("\nYou can write a query into file.txt that uses and the following columns:");
     console.log("ID, FIRST_NAME, LAST_NAME, AGE, CITY, COUNTRY");
-    let query: string = await validateInput(`enter a query : \n`,0,100,"string");
+    let query: string = await validateInput(`enter a query : \n`,1000,0,"string");
     return query;
 }
