@@ -12,7 +12,7 @@ export async function validateInput(question: string, maxLength: number,minLengt
         console.log("Wrong input, try again");
         userInput = await rl.question(question);
     }
-    if (type === 'number') {
+    if (type === 'number') {//
         while (isNaN(userInput)) {
             console.log("This is not a number");
             userInput = await rl.question(question);
